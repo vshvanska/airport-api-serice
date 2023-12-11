@@ -21,5 +21,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("__debug__/", include("debug_toolbar.urls")),
     path("api/flights/", include("flights.urls", namespace="flights")),
-    #path("api/users/", include("users.urls", namespace="users"))
+    # path("api/users/", include("users.urls", namespace="users"))
 ]
