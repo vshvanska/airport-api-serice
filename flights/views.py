@@ -33,6 +33,16 @@ class AirportViewSet(mixins.CreateModelMixin,
     serializer_class = AirportSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
+    def get_queryset(self):
+        queryset = self.queryset
+        city = self.request.query_params.get("city")
+
+        if city:
+            queryset = queryset.filter(
+                closest_big_city__icontains=city
+            )
+        return queryset
+
 
 class CrewViewSet(viewsets.ModelViewSet):
     queryset = Crew.objects.all()
