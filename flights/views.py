@@ -111,6 +111,7 @@ class FlightViewSet(mixins.CreateModelMixin,
                     GenericViewSet):
     queryset = Flight.objects.all()
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    pagination_class = OrderFlightPagination
 
     def get_queryset(self):
         queryset = self.queryset
@@ -141,7 +142,7 @@ class FlightViewSet(mixins.CreateModelMixin,
         return FlightSerializer
 
 
-class OrderPagination(PageNumberPagination):
+class OrderFlightPagination(PageNumberPagination):
     page_size = 10
     max_page_size = 100
 
@@ -152,7 +153,7 @@ class OrderViewSet(mixins.ListModelMixin,
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)
-    pagination_class = OrderPagination
+    pagination_class = OrderFlightPagination
 
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)
