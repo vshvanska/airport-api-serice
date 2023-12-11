@@ -38,7 +38,9 @@ class AirplaneType(models.Model):
 class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="orders"
     )
 
     class Meta:
@@ -129,7 +131,8 @@ class Ticket(models.Model):
                 raise error_to_raise(
                     {
                         ticket_attr_name: f"{ticket_attr_name} "
-                                          f"number must be in available range: "
+                                          f"number must be in "
+                                          f"available range: "
                                           f"(1, {airplane_attr_name}): "
                                           f"(1, {count_attrs})"
                     }
