@@ -14,10 +14,15 @@ from flights.models import (Airport,
                             Ticket)
 
 ORDER_URL = reverse("flights:order-list")
+FLIGHTS_URL = reverse("flights:flight-list")
 
 
 def detail_url(order_id):
     return reverse("flights:order-detail", args=[order_id])
+
+
+def detail_flight_url(flight_id):
+    return reverse("flights:flight-detail", args=[flight_id])
 
 
 class UnauthenticatedOrderApiTests(TestCase):
@@ -70,3 +75,27 @@ class AuthenticatedOrderApiTest(TestCase):
         self.assertEqual(ticket.seat, 8)
         flight = ticket.flight
         self.assertEqual(flight.id, self.flight.id)
+
+    def test_flight_detail_tickets(self):
+        order = Order.objects.create(user=self.user)
+        ticket = Ticket.objects.create(
+            flight=self.flight, row=2, seat=8, order=order
+        )
+        response = self.client.get(detail_flight_url(self.flight.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data["taken_places"][0]["row"], ticket.row
+        )
+        self.assertEqual(
+            response.data["taken_places"][0]["seat"], ticket.seat
+        )
+
+    def test_flight_list_places_available(self):
+        order = Order.objects.create(user=self.user)
+        Ticket.objects.create(flight=self.flight, row=2, seat=8, order=order)
+        response = self.client.get(FLIGHTS_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data[0]["available_places"],
+            self.airplane.capacity - 1,
+        )

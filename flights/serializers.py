@@ -70,6 +70,12 @@ class AirplaneListSerializer(AirplaneSerializer):
         )
 
 
+class FlightTakenPlacesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ("row", "seat")
+
+
 class FlightSerializer(serializers.ModelSerializer):
     class Meta:
         model = Flight
@@ -82,12 +88,39 @@ class FlightListSerializer(FlightSerializer):
     route = serializers.StringRelatedField()
     airplane = serializers.CharField(source="airplane.name", read_only=True)
     crew = serializers.StringRelatedField(many=True)
+    available_places = serializers.SerializerMethodField()
+
+    def get_available_places(self, obj):
+        return obj.airplane.capacity - obj.tickets.count()
+
+    class Meta:
+        model = Flight
+        fields = ("id",
+                  "route",
+                  "airplane",
+                  "departure_time",
+                  "arrival_time",
+                  "crew",
+                  "available_places")
 
 
 class FlightRetrieveSerializer(FlightSerializer):
     route = RouteListSerializer(read_only=True)
     airplane = AirplaneListSerializer(read_only=True)
     crew = CrewSerializer(many=True, read_only=True)
+    taken_places = FlightTakenPlacesSerializer(
+        source="tickets", many=True, read_only=True
+    )
+
+    class Meta:
+        model = Flight
+        fields = ("id",
+                  "route",
+                  "airplane",
+                  "departure_time",
+                  "arrival_time",
+                  "crew",
+                  "taken_places")
 
 
 class TicketSerializer(serializers.ModelSerializer):
