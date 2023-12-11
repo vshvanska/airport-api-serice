@@ -111,6 +111,27 @@ class FlightViewSet(mixins.CreateModelMixin,
     queryset = Flight.objects.all()
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
+    def get_queryset(self):
+        queryset = self.queryset
+        source = self.request.query_params.get("source")
+        destination = self.request.query_params.get("destination")
+        date = self.request.query_params.get("date")
+
+        if source:
+            queryset = queryset.filter(
+                route__source__closest_big_city__icontains=source
+            )
+
+        if destination:
+            queryset = queryset.filter(
+                route__destination__closest_big_city__icontains=destination
+            )
+
+        if date:
+            queryset = queryset.filter(departure_time__date=date)
+
+        return queryset
+
     def get_serializer_class(self):
         if self.action == "list":
             return FlightListSerializer

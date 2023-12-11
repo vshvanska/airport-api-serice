@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -40,6 +42,9 @@ class AuthenticatedFlightApiTest(TestCase):
         self.route = Route.objects.create(
             source=self.airport1, destination=self.airport2, distance=5000
         )
+        self.addition_route = Route.objects.create(
+            source=self.airport2, destination=self.airport1, distance=5000
+        )
         self.airplane_type = AirplaneType.objects.create(name="type")
         self.airplane = Airplane.objects.create(name="test",
                                                 rows=60,
@@ -59,6 +64,61 @@ class AuthenticatedFlightApiTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
+
+    def test_filter_flights_by_source(self):
+        flight1 = Flight.objects.create(route=self.route,
+                                        airplane=self.airplane,
+                                        departure_time=timezone.now(),
+                                        arrival_time=timezone.now())
+        flight2 = Flight.objects.create(route=self.addition_route,
+                                        airplane=self.airplane,
+                                        departure_time=timezone.now(),
+                                        arrival_time=timezone.now())
+        response = self.client.get(FLIGHTS_URL, {"source": "Paris"})
+
+        serializer1 = FlightListSerializer(flight1)
+        serializer2 = FlightListSerializer(flight2)
+
+        self.assertIn(serializer1.data, response.data)
+        self.assertNotIn(serializer2.data, response.data)
+
+    def test_filter_flights_by_destination(self):
+        flight1 = Flight.objects.create(route=self.route,
+                                        airplane=self.airplane,
+                                        departure_time=timezone.now(),
+                                        arrival_time=timezone.now())
+        flight2 = Flight.objects.create(route=self.addition_route,
+                                        airplane=self.airplane,
+                                        departure_time=timezone.now(),
+                                        arrival_time=timezone.now())
+        response = self.client.get(FLIGHTS_URL, {"destination": "Paris"})
+
+        serializer1 = FlightListSerializer(flight1)
+        serializer2 = FlightListSerializer(flight2)
+
+        self.assertIn(serializer2.data, response.data)
+        self.assertNotIn(serializer1.data, response.data)
+
+    def test_filter_flights_by_departure_time(self):
+        flight1 = Flight.objects.create(route=self.route,
+                                        airplane=self.airplane,
+                                        departure_time=timezone.now(),
+                                        arrival_time=timezone.now())
+        flight2 = Flight.objects.create(route=self.addition_route,
+                                        airplane=self.airplane,
+                                        departure_time=timezone
+                                        .now() + timezone.
+                                        timedelta(days=10),
+                                        arrival_time=timezone.now())
+        response = self.client.get(
+            FLIGHTS_URL, {"date": timezone.now().date()}
+        )
+
+        serializer1 = FlightListSerializer(flight1)
+        serializer2 = FlightListSerializer(flight2)
+
+        self.assertIn(serializer1.data, response.data)
+        self.assertNotIn(serializer2.data, response.data)
 
     def test_retrieve_flight(self):
         flight = Flight.objects.create(route=self.route,
