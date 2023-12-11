@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.viewsets import GenericViewSet
 
 from flights.permissions import IsAdminOrIfAuthenticatedReadOnly
-from flights.models import Airport, Crew, AirplaneType, Route, Airplane
+from flights.models import Airport, Crew, AirplaneType, Route, Airplane, Flight
 from flights.serializers import (AirportSerializer,
                                  CrewSerializer,
                                  AirplaneTypeSerializer,
@@ -11,15 +11,16 @@ from flights.serializers import (AirportSerializer,
                                  RouteListSerializer,
                                  RouteRetrieveSerializer,
                                  AirplaneSerializer,
-                                 AirplaneListSerializer)
+                                 AirplaneListSerializer,
+                                 FlightSerializer,
+                                 FlightListSerializer,
+                                 FlightRetrieveSerializer)
 
 
-class AirportViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    GenericViewSet
-):
+class AirportViewSet(mixins.CreateModelMixin,
+                     mixins.ListModelMixin,
+                     mixins.RetrieveModelMixin,
+                     GenericViewSet):
     queryset = Airport.objects.all()
     serializer_class = AirportSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
@@ -65,3 +66,19 @@ class AirplaneViewSet(mixins.CreateModelMixin,
         if self.action == "list":
             return AirplaneListSerializer
         return AirplaneSerializer
+
+
+class FlightViewSet(mixins.CreateModelMixin,
+                    mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    GenericViewSet):
+    queryset = Flight.objects.all()
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return FlightListSerializer
+        if self.action == "retrieve":
+            return FlightRetrieveSerializer
+        return FlightSerializer

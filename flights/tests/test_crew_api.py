@@ -42,7 +42,7 @@ class AuthenticatedCrewApiTest(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_admin_required(self):
-        crew = sample_crew()
+        sample_crew()
         response = self.client.get(CREW_URL)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -56,8 +56,8 @@ class AdminCrewApiTest(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_list_crew(self):
-        crew1 = sample_crew(first_name="crew1")
-        crew2 = sample_crew(last_name="crew2")
+        sample_crew(first_name="crew1")
+        sample_crew(last_name="crew2")
 
         response = self.client.get(CREW_URL)
         crews = Crew.objects.all()

@@ -37,7 +37,7 @@ class AuthenticatedAirplaneTypeApiTest(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_admin_required(self):
-        airplane_type = sample_airplane_type()
+        sample_airplane_type()
         response = self.client.get(AIRPLANE_TYPE_URL)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -51,8 +51,8 @@ class AdminAirplaneTypeApiTest(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_list_airplane_type(self):
-        airplane_type1 = sample_airplane_type(name="airplane_type1")
-        airplane_type2 = sample_airplane_type(name="airplane_type2")
+        sample_airplane_type(name="airplane_type1")
+        sample_airplane_type(name="airplane_type2")
 
         response = self.client.get(AIRPLANE_TYPE_URL)
         airplane_types = AirplaneType.objects.all()

@@ -38,7 +38,9 @@ class AuthenticatedAirplaneApiTest(TestCase):
 
     def test_list_airplane(self):
         airplane_type = sample_airplane_type()
-        airplane = Airplane.objects.create(name="test", rows=60, seats_in_row=8, airplane_type=airplane_type)
+        Airplane.objects.create(
+            name="test", rows=60, seats_in_row=8, airplane_type=airplane_type
+        )
 
         response = self.client.get(AIRPLANE_URL)
         routes = Airplane.objects.all()
@@ -49,7 +51,11 @@ class AuthenticatedAirplaneApiTest(TestCase):
 
     def test_admin_required(self):
         airplane_type = sample_airplane_type()
-        payload = {"name": "test", "rows": 40, "seats_in_row": 6, "airplane_type": airplane_type.id}
+        payload = {
+            "name": "test",
+            "rows": 40,
+            "seats_in_row": 6,
+            "airplane_type": airplane_type.id}
         response = self.client.post(AIRPLANE_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 

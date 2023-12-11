@@ -42,8 +42,8 @@ class AuthenticatedAirportApiTest(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_list_airport(self):
-        airport1 = sample_airport(name="airport1")
-        airport2 = sample_airport(name="airport2")
+        sample_airport(name="airport1")
+        sample_airport(name="airport2")
 
         response = self.client.get(AIRPORT_URL)
         airports = Airport.objects.all()
