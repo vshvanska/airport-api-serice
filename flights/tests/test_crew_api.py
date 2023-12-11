@@ -48,7 +48,7 @@ class AuthenticatedCrewApiTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class AdminAirportApiTest(TestCase):
+class AdminCrewApiTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
@@ -84,8 +84,9 @@ class AdminAirportApiTest(TestCase):
         payload = {"first_name": "Name", "last_name": "Last name"}
         response = self.client.put(url, payload)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        updated_crew = Crew.objects.get(pk=1)
-        self.assertEqual(updated_crew.last_name, payload["last_name"])
+        crew = Crew.objects.get(id=response.data["id"])
+        for key in payload:
+            self.assertEqual(payload[key], getattr(crew, key))
 
     def test_delete_crew(self):
         crew = sample_crew()
