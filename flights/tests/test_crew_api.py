@@ -44,7 +44,6 @@ class AuthenticatedCrewApiTest(TestCase):
     def test_admin_required(self):
         crew = sample_crew()
         response = self.client.get(CREW_URL)
-        crews = Crew.objects.all()
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
