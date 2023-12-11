@@ -63,7 +63,7 @@ class RouteViewSet(mixins.CreateModelMixin,
                    mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    GenericViewSet):
-    queryset = Route.objects.all()
+    queryset = Route.objects.select_related("source", "destination")
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_queryset(self):
@@ -81,7 +81,7 @@ class RouteViewSet(mixins.CreateModelMixin,
                 destination__closest_big_city__icontains=destination
             )
 
-        return queryset
+        return queryset.select_related("source", "destination")
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -94,7 +94,7 @@ class RouteViewSet(mixins.CreateModelMixin,
 class AirplaneViewSet(mixins.CreateModelMixin,
                       mixins.ListModelMixin,
                       GenericViewSet):
-    queryset = Airplane.objects.all()
+    queryset = Airplane.objects.select_related("airplane_type")
     serializer_class = AirplaneListSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
@@ -104,12 +104,17 @@ class AirplaneViewSet(mixins.CreateModelMixin,
         return AirplaneSerializer
 
 
+class OrderFlightPagination(PageNumberPagination):
+    page_size = 10
+    max_page_size = 100
+
+
 class FlightViewSet(mixins.CreateModelMixin,
                     mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
                     GenericViewSet):
-    queryset = Flight.objects.all()
+    queryset = Flight.objects.prefetch_related("crew", "tickets")
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
     pagination_class = OrderFlightPagination
 
@@ -132,7 +137,9 @@ class FlightViewSet(mixins.CreateModelMixin,
         if date:
             queryset = queryset.filter(departure_time__date=date)
 
-        return queryset
+        return queryset.select_related(
+            "route", "airplane", "route__source", "route__destination"
+        )
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -142,15 +149,10 @@ class FlightViewSet(mixins.CreateModelMixin,
         return FlightSerializer
 
 
-class OrderFlightPagination(PageNumberPagination):
-    page_size = 10
-    max_page_size = 100
-
-
 class OrderViewSet(mixins.ListModelMixin,
                    mixins.CreateModelMixin,
                    GenericViewSet):
-    queryset = Order.objects.all()
+    queryset = Order.objects.select_related("user")
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = OrderFlightPagination
