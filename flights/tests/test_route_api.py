@@ -52,6 +52,38 @@ class AuthenticatedRouteApiTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
 
+    def test_filter_routes_by_source(self):
+        route1 = Route.objects.create(
+            source=self.airport1, destination=self.airport2, distance=30
+        )
+        route2 = Route.objects.create(
+            source=self.airport2, destination=self.airport1, distance=30
+        )
+
+        response = self.client.get(ROUTE_URL, {"source": "Paris"})
+
+        serializer1 = RouteListSerializer(route1)
+        serializer2 = RouteListSerializer(route2)
+
+        self.assertIn(serializer1.data, response.data)
+        self.assertNotIn(serializer2.data, response.data)
+
+    def test_filter_routes_by_destination(self):
+        route1 = Route.objects.create(
+            source=self.airport1, destination=self.airport2, distance=30
+        )
+        route2 = Route.objects.create(
+            source=self.airport2, destination=self.airport1, distance=30
+        )
+
+        response = self.client.get(ROUTE_URL, {"destination": "Paris"})
+
+        serializer1 = RouteListSerializer(route1)
+        serializer2 = RouteListSerializer(route2)
+
+        self.assertIn(serializer2.data, response.data)
+        self.assertNotIn(serializer1.data, response.data)
+
     def test_create_route_forbidden(self):
         payload = {
             "source": self.airport2,
