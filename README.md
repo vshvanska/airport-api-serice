@@ -9,15 +9,12 @@ cd cinema_API
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-create .env file, inside:
-- set DB_HOST=<your db hostname>
-- set DB_NAME=<your db name>
-- set DB_USER=<your db username>
-- set DB_PASSWORD=<your db user password>
-- set SECRET_KEY=<your secret key>
+create .env file, inside define variables from .env.sample
 
 python manage.py migrate
 python manage.py runserver
+
+you can use command python manage.py loaddata airport_service_db_data.json to fill db 
 
 # Run with docker
 Docker should be installed
