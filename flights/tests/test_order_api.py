@@ -1,3 +1,5 @@
+import time
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -74,6 +76,27 @@ class AuthenticatedOrderApiTest(TestCase):
         self.assertEqual(ticket["row"], 2)
         self.assertEqual(ticket["seat"], 8)
         self.assertEqual(ticket["flight"], self.flight.id)
+
+    def test_create_ticket_for_flight_in_past(self):
+        # Create a flight with departure_time in the past
+        past_departure_time = timezone.now() - timezone.timedelta(hours=3)
+        flight = Flight.objects.create(
+            route=self.route,
+            airplane=self.airplane,
+            departure_time=past_departure_time,
+            arrival_time=past_departure_time + timezone.timedelta(hours=3)
+        )
+
+        payload = {"tickets": [
+            {"flight": flight.id,
+             "row": 2,
+             "seat": 5}]
+        }
+        response = self.client.post(ORDER_URL, payload)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        expected_error_message = ("Booking tickets is available no later "
+                                  "than three hours before departure")
+        self.assertIn(expected_error_message, response.data["tickets"])
 
     def test_flight_detail_tickets(self):
         order = Order.objects.create(user=self.user)

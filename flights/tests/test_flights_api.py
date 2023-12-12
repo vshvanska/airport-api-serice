@@ -190,16 +190,26 @@ class AdminMovieApiTest(TestCase):
         }
         response = self.client.post(FLIGHTS_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        expected_error_message = ("Flights must be created no later "
+                                  "than a day before departure")
+        self.assertIn(
+            expected_error_message, response.data["non_field_errors"]
+        )
 
     def test_create_flight_with_invalid_arrival_time(self):
         payload = {
             "route": self.route.id,
             "airplane": self.airplane.id,
-            "departure_time": timezone.now() + timezone.timedelta(days=1),
+            "departure_time": timezone.now() + timezone.timedelta(days=2),
             "arrival_time": timezone.now()
         }
         response = self.client.post(FLIGHTS_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        expected_error_message = ("Arrival time must be "
+                                  "later than departure time.")
+        self.assertIn(
+            expected_error_message, response.data["non_field_errors"]
+        )
 
     def test_update_flight_with_invalid_departure_time(self):
         flight = Flight.objects.create(
@@ -212,6 +222,10 @@ class AdminMovieApiTest(TestCase):
         }
         response = self.client.patch(detail_url(flight.id), payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        expected_error_message = "Departure time must be in future"
+        self.assertIn(
+            expected_error_message, response.data["non_field_errors"]
+        )
 
     def test_create_flight_with_crew(self):
         person1 = Crew.objects.create(first_name="Ann", last_name="Ok")

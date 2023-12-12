@@ -161,6 +161,13 @@ class TicketSerializer(serializers.ModelSerializer):
             attrs["flight"].airplane,
             ValidationError,
         )
+        flight = data.get("flight")
+        if (flight.departure_time < timezone.now() + timezone
+                .timedelta(hours=3)):
+            raise ValidationError(
+                "Booking tickets is available no later "
+                "than three hours before departure"
+            )
         return data
 
     class Meta:
