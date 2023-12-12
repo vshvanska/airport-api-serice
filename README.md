@@ -28,3 +28,16 @@ docker-compose up
 # Getting access
 create user via /api/user/register/
 get access token via /api/user/token/
+
+# Features
+ - JWT authenticated
+ - Throttling
+ - Admin panel /admin/
+ - Documentation is located at /api/doc/swagger
+ - Managing orders and tickets
+ - Creating airplanes, airports, routes, crew
+ - Managing flights
+ - Adding flights with crew
+ - Filtering airports by city
+ - Filtering routes by source, destination
+ - Filtering flights by routes, date
