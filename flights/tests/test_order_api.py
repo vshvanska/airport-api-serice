@@ -67,14 +67,13 @@ class AuthenticatedOrderApiTest(TestCase):
         response = self.client.get(ORDER_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(Order.objects.count(), 1)
-        order = Order.objects.get(id=order.id)
-        self.assertEqual(order.tickets.count(), 1)
-        ticket = order.tickets.first()
-        self.assertEqual(ticket.row, 2)
-        self.assertEqual(ticket.seat, 8)
-        flight = ticket.flight
-        self.assertEqual(flight.id, self.flight.id)
+        self.assertEqual(response.data["count"], 1)
+        order = response.data["results"][0]
+        self.assertEqual(len(order["tickets"]), 1)
+        ticket = order["tickets"][0]
+        self.assertEqual(ticket["row"], 2)
+        self.assertEqual(ticket["seat"], 8)
+        self.assertEqual(ticket["flight"], self.flight.id)
 
     def test_flight_detail_tickets(self):
         order = Order.objects.create(user=self.user)
@@ -95,7 +94,8 @@ class AuthenticatedOrderApiTest(TestCase):
         Ticket.objects.create(flight=self.flight, row=2, seat=8, order=order)
         response = self.client.get(FLIGHTS_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        flight = response.data["results"][0]
         self.assertEqual(
-            response.data[0]["available_places"],
+            flight["available_places"],
             self.airplane.capacity - 1,
         )
