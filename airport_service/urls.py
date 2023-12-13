@@ -27,14 +27,13 @@ urlpatterns = [
     path("__debug__/", include("debug_toolbar.urls")),
     path("api/flights/", include("flights.urls", namespace="flights")),
     path("api/users/", include("users.urls", namespace="users")),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/doc/swagger/",
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
     path(
-        "api/doc/redoc/", SpectacularRedocView.as_view(
-            url_name="schema"), name="redoc"
+        "api/doc/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"
     ),
 ]

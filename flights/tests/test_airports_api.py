@@ -11,10 +11,7 @@ AIRPORT_URL = reverse("flights:airport-list")
 
 
 def sample_airport(**params):
-    defaults = {
-        "name": "test_airport",
-        "closest_big_city": "City"
-    }
+    defaults = {"name": "test_airport", "closest_big_city": "City"}
     defaults.update(params)
 
     return Airport.objects.create(**defaults)

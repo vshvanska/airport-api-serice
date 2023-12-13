@@ -46,18 +46,17 @@ class AuthenticatedFlightApiTest(TestCase):
             source=self.airport2, destination=self.airport1, distance=5000
         )
         self.airplane_type = AirplaneType.objects.create(name="type")
-        self.airplane = Airplane.objects.create(name="test",
-                                                rows=60,
-                                                seats_in_row=8,
-                                                airplane_type=self.
-                                                airplane_type)
+        self.airplane = Airplane.objects.create(
+            name="test", rows=60, seats_in_row=8, airplane_type=self.airplane_type
+        )
 
     def test_list_flight(self):
         Flight.objects.create(
             route=self.route,
             airplane=self.airplane,
             departure_time=timezone.now() + timezone.timedelta(days=1),
-            arrival_time=timezone.now() + timezone.timedelta(days=2))
+            arrival_time=timezone.now() + timezone.timedelta(days=2),
+        )
 
         response = self.client.get(FLIGHTS_URL)
 
@@ -72,12 +71,14 @@ class AuthenticatedFlightApiTest(TestCase):
             route=self.route,
             airplane=self.airplane,
             departure_time=timezone.now() + timezone.timedelta(days=1),
-            arrival_time=timezone.now() + timezone.timedelta(days=2))
+            arrival_time=timezone.now() + timezone.timedelta(days=2),
+        )
         Flight.objects.create(
             route=self.addition_route,
             airplane=self.airplane,
             departure_time=timezone.now() + timezone.timedelta(days=2),
-            arrival_time=timezone.now() + timezone.timedelta(days=3))
+            arrival_time=timezone.now() + timezone.timedelta(days=3),
+        )
         response = self.client.get(FLIGHTS_URL, {"source": "Paris"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -90,12 +91,14 @@ class AuthenticatedFlightApiTest(TestCase):
             route=self.route,
             airplane=self.airplane,
             departure_time=timezone.now() + timezone.timedelta(days=1),
-            arrival_time=timezone.now() + timezone.timedelta(days=2))
+            arrival_time=timezone.now() + timezone.timedelta(days=2),
+        )
         Flight.objects.create(
             route=self.addition_route,
             airplane=self.airplane,
             departure_time=timezone.now() + timezone.timedelta(days=1),
-            arrival_time=timezone.now() + timezone.timedelta(days=2))
+            arrival_time=timezone.now() + timezone.timedelta(days=2),
+        )
         response = self.client.get(FLIGHTS_URL, {"destination": "Paris"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -108,16 +111,16 @@ class AuthenticatedFlightApiTest(TestCase):
             route=self.route,
             airplane=self.airplane,
             departure_time=timezone.now() + timezone.timedelta(days=1),
-            arrival_time=timezone.now() + timezone.timedelta(days=2))
+            arrival_time=timezone.now() + timezone.timedelta(days=2),
+        )
         Flight.objects.create(
             route=self.addition_route,
             airplane=self.airplane,
             departure_time=timezone.now() + timezone.timedelta(days=10),
-            arrival_time=timezone.now() + timezone.timedelta(days=12))
+            arrival_time=timezone.now() + timezone.timedelta(days=12),
+        )
         response = self.client.get(
-            FLIGHTS_URL, {
-                "date": timezone.now().date() + timezone.timedelta(days=1)
-            }
+            FLIGHTS_URL, {"date": timezone.now().date() + timezone.timedelta(days=1)}
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -130,7 +133,8 @@ class AuthenticatedFlightApiTest(TestCase):
             route=self.route,
             airplane=self.airplane,
             departure_time=timezone.now() + timezone.timedelta(days=1),
-            arrival_time=timezone.now() + timezone.timedelta(days=2))
+            arrival_time=timezone.now() + timezone.timedelta(days=2),
+        )
         url = detail_url(flight.id)
         response = self.client.get(url)
         serializer = FlightRetrieveSerializer(flight)
@@ -142,7 +146,7 @@ class AuthenticatedFlightApiTest(TestCase):
             "route": self.route.id,
             "airplane": self.airplane.id,
             "departure_time": timezone.now(),
-            "arrival_time": timezone.now()
+            "arrival_time": timezone.now(),
         }
         response = self.client.post(FLIGHTS_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -165,11 +169,9 @@ class AdminMovieApiTest(TestCase):
             source=self.airport1, destination=self.airport2, distance=5000
         )
         self.airplane_type = AirplaneType.objects.create(name="type")
-        self.airplane = Airplane.objects.create(name="test",
-                                                rows=60,
-                                                seats_in_row=8,
-                                                airplane_type=self.
-                                                airplane_type)
+        self.airplane = Airplane.objects.create(
+            name="test", rows=60, seats_in_row=8, airplane_type=self.airplane_type
+        )
 
     def test_create_flight(self):
         payload = {
@@ -190,42 +192,37 @@ class AdminMovieApiTest(TestCase):
         }
         response = self.client.post(FLIGHTS_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        expected_error_message = ("Flights must be created no later "
-                                  "than a day before departure")
-        self.assertIn(
-            expected_error_message, response.data["non_field_errors"]
+        expected_error_message = (
+            "Flights must be created no later " "than a day before departure"
         )
+        self.assertIn(expected_error_message, response.data["non_field_errors"])
 
     def test_create_flight_with_invalid_arrival_time(self):
         payload = {
             "route": self.route.id,
             "airplane": self.airplane.id,
             "departure_time": timezone.now() + timezone.timedelta(days=2),
-            "arrival_time": timezone.now()
+            "arrival_time": timezone.now(),
         }
         response = self.client.post(FLIGHTS_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        expected_error_message = ("Arrival time must be "
-                                  "later than departure time.")
-        self.assertIn(
-            expected_error_message, response.data["non_field_errors"]
-        )
+        expected_error_message = "Arrival time must be " "later than departure time."
+        self.assertIn(expected_error_message, response.data["non_field_errors"])
 
     def test_update_flight_with_invalid_departure_time(self):
         flight = Flight.objects.create(
             route=self.route,
             airplane=self.airplane,
             departure_time=timezone.now() + timezone.timedelta(days=1),
-            arrival_time=timezone.now() + timezone.timedelta(days=2))
+            arrival_time=timezone.now() + timezone.timedelta(days=2),
+        )
         payload = {
             "departure_time": timezone.now() - timezone.timedelta(days=1),
         }
         response = self.client.patch(detail_url(flight.id), payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         expected_error_message = "Departure time must be in future"
-        self.assertIn(
-            expected_error_message, response.data["non_field_errors"]
-        )
+        self.assertIn(expected_error_message, response.data["non_field_errors"])
 
     def test_create_flight_with_crew(self):
         person1 = Crew.objects.create(first_name="Ann", last_name="Ok")
@@ -236,7 +233,7 @@ class AdminMovieApiTest(TestCase):
             "airplane": self.airplane.id,
             "departure_time": timezone.now() + timezone.timedelta(days=2),
             "arrival_time": timezone.now() + timezone.timedelta(days=3),
-            "crew": [person1.id, person2.id]
+            "crew": [person1.id, person2.id],
         }
 
         response = self.client.post(FLIGHTS_URL, payload)

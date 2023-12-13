@@ -7,13 +7,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from flights.models import (Airport,
-                            Route,
-                            Flight,
-                            AirplaneType,
-                            Airplane,
-                            Order,
-                            Ticket)
+from flights.models import Airport, Route, Flight, AirplaneType, Airplane, Order, Ticket
 
 ORDER_URL = reverse("flights:order-list")
 FLIGHTS_URL = reverse("flights:flight-list")
@@ -53,15 +47,15 @@ class AuthenticatedOrderApiTest(TestCase):
             source=self.airport1, destination=self.airport2, distance=5000
         )
         self.airplane_type = AirplaneType.objects.create(name="type")
-        self.airplane = Airplane.objects.create(name="test",
-                                                rows=60,
-                                                seats_in_row=8,
-                                                airplane_type=self.
-                                                airplane_type)
-        self.flight = Flight.objects.create(route=self.route,
-                                            airplane=self.airplane,
-                                            departure_time=timezone.now(),
-                                            arrival_time=timezone.now())
+        self.airplane = Airplane.objects.create(
+            name="test", rows=60, seats_in_row=8, airplane_type=self.airplane_type
+        )
+        self.flight = Flight.objects.create(
+            route=self.route,
+            airplane=self.airplane,
+            departure_time=timezone.now(),
+            arrival_time=timezone.now(),
+        )
 
     def test_list_order(self):
         order = Order.objects.create(user=self.user)
@@ -84,33 +78,24 @@ class AuthenticatedOrderApiTest(TestCase):
             route=self.route,
             airplane=self.airplane,
             departure_time=past_departure_time,
-            arrival_time=past_departure_time + timezone.timedelta(hours=3)
+            arrival_time=past_departure_time + timezone.timedelta(hours=3),
         )
 
-        payload = {"tickets": [
-            {"flight": flight.id,
-             "row": 2,
-             "seat": 5}]
-        }
+        payload = {"tickets": [{"flight": flight.id, "row": 2, "seat": 5}]}
         response = self.client.post(ORDER_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        expected_error_message = ("Booking tickets is available no later "
-                                  "than three hours before departure")
+        expected_error_message = (
+            "Booking tickets is available no later " "than three hours before departure"
+        )
         self.assertIn(expected_error_message, response.data["tickets"])
 
     def test_flight_detail_tickets(self):
         order = Order.objects.create(user=self.user)
-        ticket = Ticket.objects.create(
-            flight=self.flight, row=2, seat=8, order=order
-        )
+        ticket = Ticket.objects.create(flight=self.flight, row=2, seat=8, order=order)
         response = self.client.get(detail_flight_url(self.flight.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.data["taken_places"][0]["row"], ticket.row
-        )
-        self.assertEqual(
-            response.data["taken_places"][0]["seat"], ticket.seat
-        )
+        self.assertEqual(response.data["taken_places"][0]["row"], ticket.row)
+        self.assertEqual(response.data["taken_places"][0]["seat"], ticket.seat)
 
     def test_flight_list_places_available(self):
         order = Order.objects.create(user=self.user)

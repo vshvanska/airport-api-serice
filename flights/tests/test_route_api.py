@@ -88,7 +88,7 @@ class AuthenticatedRouteApiTest(TestCase):
         payload = {
             "source": self.airport2,
             "destination": self.airport1,
-            "distance": 30
+            "distance": 30,
         }
         response = self.client.post(ROUTE_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -137,7 +137,7 @@ class AdminRouteApiTest(TestCase):
         payload = {
             "source": self.airport2.id,
             "destination": self.airport1.id,
-            "distance": 500
+            "distance": 500,
         }
         response = self.client.post(ROUTE_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

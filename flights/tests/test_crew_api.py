@@ -11,10 +11,7 @@ CREW_URL = reverse("flights:crew-list")
 
 
 def sample_crew(**params):
-    defaults = {
-        "first_name": "Alex",
-        "last_name": "Black"
-    }
+    defaults = {"first_name": "Alex", "last_name": "Black"}
     defaults.update(params)
 
     return Crew.objects.create(**defaults)

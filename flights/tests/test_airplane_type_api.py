@@ -11,9 +11,7 @@ AIRPLANE_TYPE_URL = reverse("flights:airplanetype-list")
 
 
 def sample_airplane_type(**params):
-    defaults = {
-        "name": "test_type"
-    }
+    defaults = {"name": "test_type"}
     defaults.update(params)
 
     return AirplaneType.objects.create(**defaults)

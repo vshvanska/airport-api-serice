@@ -3,14 +3,16 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from flights.models import (Airport,
-                            Crew,
-                            AirplaneType,
-                            Route,
-                            Airplane,
-                            Flight,
-                            Ticket,
-                            Order)
+from flights.models import (
+    Airport,
+    Crew,
+    AirplaneType,
+    Route,
+    Airplane,
+    Flight,
+    Ticket,
+    Order,
+)
 
 
 class AirportSerializer(serializers.ModelSerializer):
@@ -38,9 +40,7 @@ class RouteSerializer(serializers.ModelSerializer):
 
 
 class RouteListSerializer(RouteSerializer):
-    source = serializers.CharField(
-        source="source.closest_big_city", read_only=True
-    )
+    source = serializers.CharField(source="source.closest_big_city", read_only=True)
     destination = serializers.CharField(
         source="destination.closest_big_city", read_only=True
     )
@@ -66,9 +66,7 @@ class AirplaneListSerializer(AirplaneSerializer):
 
     class Meta:
         model = Airplane
-        fields = (
-            "id", "name", "rows", "seats_in_row", "capacity", "airplane_type"
-        )
+        fields = ("id", "name", "rows", "seats_in_row", "capacity", "airplane_type")
 
 
 class FlightTakenPlacesSerializer(serializers.ModelSerializer):
@@ -80,35 +78,27 @@ class FlightTakenPlacesSerializer(serializers.ModelSerializer):
 class FlightSerializer(serializers.ModelSerializer):
     class Meta:
         model = Flight
-        fields = (
-            "id", "route", "airplane", "departure_time", "arrival_time", "crew"
-        )
+        fields = ("id", "route", "airplane", "departure_time", "arrival_time", "crew")
 
     def validate(self, data):
-
         super().validate(data)
 
-        departure_time = data.get('departure_time')
-        arrival_time = data.get('arrival_time')
+        departure_time = data.get("departure_time")
+        arrival_time = data.get("arrival_time")
         allow_create_time = timezone.now() + timezone.timedelta(days=1)
         allow_update_time = timezone.now()
 
         if self.instance is None:
             if departure_time < allow_create_time:
                 raise serializers.ValidationError(
-                    "Flights must be created no later "
-                    "than a day before departure"
+                    "Flights must be created no later " "than a day before departure"
                 )
         else:
             if departure_time < allow_update_time:
-                raise serializers.ValidationError(
-                    "Departure time must be in future"
-                )
+                raise serializers.ValidationError("Departure time must be in future")
 
         if arrival_time <= departure_time:
-            raise ValidationError(
-                "Arrival time must be later than departure time."
-            )
+            raise ValidationError("Arrival time must be later than departure time.")
 
         return data
 
@@ -124,13 +114,15 @@ class FlightListSerializer(FlightSerializer):
 
     class Meta:
         model = Flight
-        fields = ("id",
-                  "route",
-                  "airplane",
-                  "departure_time",
-                  "arrival_time",
-                  "crew",
-                  "available_places")
+        fields = (
+            "id",
+            "route",
+            "airplane",
+            "departure_time",
+            "arrival_time",
+            "crew",
+            "available_places",
+        )
 
 
 class FlightRetrieveSerializer(FlightSerializer):
@@ -143,13 +135,15 @@ class FlightRetrieveSerializer(FlightSerializer):
 
     class Meta:
         model = Flight
-        fields = ("id",
-                  "route",
-                  "airplane",
-                  "departure_time",
-                  "arrival_time",
-                  "crew",
-                  "taken_places")
+        fields = (
+            "id",
+            "route",
+            "airplane",
+            "departure_time",
+            "arrival_time",
+            "crew",
+            "taken_places",
+        )
 
 
 class TicketSerializer(serializers.ModelSerializer):
@@ -162,8 +156,7 @@ class TicketSerializer(serializers.ModelSerializer):
             ValidationError,
         )
         flight = data.get("flight")
-        if (flight.departure_time < timezone.now() + timezone
-                .timedelta(hours=3)):
+        if flight.departure_time < timezone.now() + timezone.timedelta(hours=3):
             raise ValidationError(
                 "Booking tickets is available no later "
                 "than three hours before departure"

@@ -11,9 +11,7 @@ AIRPLANE_URL = reverse("flights:airplane-list")
 
 
 def sample_airplane_type(**params):
-    defaults = {
-        "name": "test_type"
-    }
+    defaults = {"name": "test_type"}
     defaults.update(params)
 
     return AirplaneType.objects.create(**defaults)
@@ -55,7 +53,8 @@ class AuthenticatedAirplaneApiTest(TestCase):
             "name": "test",
             "rows": 40,
             "seats_in_row": 6,
-            "airplane_type": airplane_type.id}
+            "airplane_type": airplane_type.id,
+        }
         response = self.client.post(AIRPLANE_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -70,9 +69,11 @@ class AdminAirplaneApiTest(TestCase):
         self.airplane_type = sample_airplane_type(name="type1")
 
     def test_create_airplane(self):
-        payload = {"name": "test",
-                   "rows": 40,
-                   "seats_in_row": 6,
-                   "airplane_type": self.airplane_type.id}
+        payload = {
+            "name": "test",
+            "rows": 40,
+            "seats_in_row": 6,
+            "airplane_type": self.airplane_type.id,
+        }
         response = self.client.post(AIRPLANE_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
