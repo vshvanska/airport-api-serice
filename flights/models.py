@@ -61,7 +61,7 @@ class Route(models.Model):
         ordering = ("source",)
 
     def __str__(self):
-        return f"{self.source.closest_big_city}-" f"{self.destination.closest_big_city}"
+        return f"{self.source.name}-" f"{self.destination.name}"
 
 
 class Airplane(models.Model):

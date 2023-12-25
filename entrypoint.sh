@@ -12,6 +12,7 @@ done
 # Perform Django database migrations
 python manage.py makemigrations
 python manage.py migrate
+python manage.py loaddata airport_service_db_data.json
 
 
 # Start Django development server
