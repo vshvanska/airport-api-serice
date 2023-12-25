@@ -1,10 +1,10 @@
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, viewsets
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
+from flights.paginators import OrderFlightPagination
 from flights.permissions import IsAdminOrIfAuthenticatedReadOnly
 from flights.models import Airport, Crew, AirplaneType, Route, Airplane, Flight, Order
 from flights.serializers import (
@@ -130,11 +130,6 @@ class AirplaneViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, GenericVie
         if self.action == "list":
             return AirplaneListSerializer
         return AirplaneSerializer
-
-
-class OrderFlightPagination(PageNumberPagination):
-    page_size = 10
-    max_page_size = 100
 
 
 class FlightViewSet(
